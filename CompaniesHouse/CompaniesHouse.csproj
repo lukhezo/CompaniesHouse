@@ -16,8 +16,7 @@
 
   <ItemGroup>
     <None Update="appsettings.json">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>appsettings.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

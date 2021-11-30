@@ -3,8 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CompaniesHouse
 {
-    internal static class Startup
+    internal class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         internal static ServiceProvider ConfigureServices()
         {
             var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
