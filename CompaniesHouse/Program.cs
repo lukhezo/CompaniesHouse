@@ -20,13 +20,42 @@ namespace CompaniesHouse
 
         static async Task Main(string[] args)
         {
+            bool isNumeric;
+            string companyNumber;
+            do
+            {
+                Console.Write("Please enter a company number:");
+                companyNumber = Console.ReadLine().Trim();
+                isNumeric = int.TryParse(companyNumber, out _);
+                Console.WriteLine();
+            } while (!isNumeric);
+
+            ConsoleKeyInfo cki;
+            Console.TreatControlCAsInput = true;
+
+            do
+            {
+                cki = Console.ReadKey();     
+                if ((cki.Modifiers & ConsoleModifiers.Alt) != 0) Console.Write("ALT+");
+                if ((cki.Modifiers & ConsoleModifiers.Shift) != 0) Console.Write("SHIFT+");
+                if ((cki.Modifiers & ConsoleModifiers.Control) != 0) Console.Write("CTL+");
+               
+                if(cki.Key != ConsoleKey.Y && cki.Key != ConsoleKey.N)
+                {
+                    Console.Clear();
+                    Console.WriteLine("View API responses in console screen or web browser (Y/N):");
+                    Console.WriteLine($"You entered {cki.Key}");
+                }
+
+            } while (cki.Key != ConsoleKey.Y && cki.Key != ConsoleKey.N);
+        
+
+        Console.WriteLine();
+
             int choice = -1;
 
             while (choice != 0)
             {
-                Console.Write("Please enter a company number:");
-                string companyNumber = Console.ReadLine();
-                Console.WriteLine();
                 Console.WriteLine("Please choose one of the following options:");
                 Console.WriteLine();
                 Console.WriteLine("1. Registered Address");
@@ -49,16 +78,16 @@ namespace CompaniesHouse
                 switch (choice)
                 {
                     case 1:
-                        await RegisteredOfficeAddress(companyNumber);
+                        await RegisteredOfficeAddress(companyNumber, cki.Key == ConsoleKey.Y);
                         break;
                     case 2:
-                        await CompanyProfile(companyNumber);
+                        await CompanyProfile(companyNumber, cki.Key == ConsoleKey.Y);
                         break;
                     case 3:
-                        await Officers(companyNumber);
+                        await Officers(companyNumber, cki.Key == ConsoleKey.Y);
                         break;
                     case 4:
-                        await Establishments(companyNumber);
+                        await Establishments(companyNumber, cki.Key == ConsoleKey.Y);
                         break;
                     case 5:
                         // Exit the program
@@ -76,7 +105,7 @@ namespace CompaniesHouse
         /// LIVE environment. You will need to enter is below where is says "YOURAPIKEYHERE"
         /// </summary>
         /// <returns></returns>
-        private static async Task RegisteredOfficeAddress(string companyNumber)
+        private static async Task RegisteredOfficeAddress(string companyNumber, bool isFormated)
         {
             HttpClient client = new HttpClient { BaseAddress = BaseAddress };
             client.DefaultRequestHeaders.Accept.Clear();
@@ -90,13 +119,18 @@ namespace CompaniesHouse
 
             //Just for Viewing in Console Screen
             string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
-            Console.WriteLine(formattedReponse);
-            //OpenInWebBrowser(formattedReponse);
 
+            if (isFormated)
+            {
+                Console.WriteLine(formattedReponse);
+            }
+            else
+            {
+                OpenInWebBrowser(formattedReponse);
+            }
         }
 
-
-        private static async Task CompanyProfile(string companyNumber)
+        private static async Task CompanyProfile(string companyNumber, bool isFormated)
         {
             HttpClient client = new HttpClient { BaseAddress = BaseAddress };
             client.DefaultRequestHeaders.Accept.Clear();
@@ -107,23 +141,32 @@ namespace CompaniesHouse
             var query = $"company/{companyNumber}";
             var response = await client.GetStringAsync(query);
             var obj = JsonConvert.DeserializeObject<CompanyProfileReponse>(response);
-
-
-            if(obj.company_status == "active")
+            string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
+        
+            if (isFormated)
             {
-                //Just for Viewing in Console Screen
-                string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
                 Console.WriteLine(formattedReponse);
-                //OpenInWebBrowser(formattedReponse);
             }
             else
             {
-                Console.WriteLine($"{companyNumber} is no longer active");
+                OpenInWebBrowser(formattedReponse);
             }
+
+            //if(obj.company_status == "active")
+            //{
+            //    //Just for Viewing in Console Screen
+            //    string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            //    Console.WriteLine(formattedReponse);
+            //    //OpenInWebBrowser(formattedReponse);
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"{companyNumber} is no longer active");
+            //}
 
         }
 
-        private static async Task Officers(string companyNumber)
+        private static async Task Officers(string companyNumber, bool isFormated)
         {
             HttpClient client = new HttpClient { BaseAddress = BaseAddress };
             client.DefaultRequestHeaders.Accept.Clear();
@@ -135,11 +178,18 @@ namespace CompaniesHouse
             var response = await client.GetStringAsync(query);
             var obj = JsonConvert.DeserializeObject<OfficersResponse>(response);
             string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
-            Console.WriteLine(formattedReponse);
-            //OpenInWebBrowser(formattedReponse);
+        
+            if (isFormated)
+            {
+                Console.WriteLine(formattedReponse);
+            }
+            else
+            {
+                OpenInWebBrowser(formattedReponse);
+            }
         }
 
-        private static async Task Establishments(string companyNumber)
+        private static async Task Establishments(string companyNumber, bool isFormated)
         {
             HttpClient client = new HttpClient { BaseAddress = BaseAddress };
             client.DefaultRequestHeaders.Accept.Clear();
@@ -151,8 +201,15 @@ namespace CompaniesHouse
             var response = await client.GetStringAsync(query);
             var obj = JsonConvert.DeserializeObject<EstablishmentsResponse>(response);
             string formattedReponse = JsonConvert.SerializeObject(obj, Formatting.Indented);
-            Console.WriteLine(formattedReponse);
-            //OpenInWebBrowser(formattedReponse);
+          
+            if (isFormated)
+            {
+                Console.WriteLine(formattedReponse);
+            }
+            else
+            {
+                OpenInWebBrowser(formattedReponse);
+            }
         }
 
         public static void OpenInWebBrowser(string formattedReponse)
